@@ -1,0 +1,20 @@
+# Repo-wide ignores. Backend build artifacts live in backend/.gitignore.
+
+# Electron
+electronApp/node_modules/
+electronApp/dist/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Docs
+docs/
+
+# Keep keycloak/realm-export.json tracked; ignore any runtime data if it ever lands here
+keycloak/data/
