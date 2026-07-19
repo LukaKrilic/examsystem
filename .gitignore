@@ -1,4 +1,17 @@
-# Repo-wide ignores. Backend build artifacts live in backend/.gitignore.
+# Repo-wide ignores.
+
+# .NET / C#
+bin/
+obj/
+*.user
+[Bb]uild/
+[Oo]ut/
+project.lock.json
+*.nupkg
+
+# ASP.NET Core
+appsettings.*.local.json
+wwwroot/lib/
 
 # Electron
 electronApp/node_modules/
