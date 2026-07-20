@@ -18,6 +18,7 @@ electronApp/node_modules/
 electronApp/dist/
 
 # IDE
+.vs/
 .idea/
 *.iml
 .vscode/
