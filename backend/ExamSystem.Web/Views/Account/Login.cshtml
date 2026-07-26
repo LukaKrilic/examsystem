@@ -1,0 +1,8 @@
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["Login.Title"];
+}
+
+<h1>@Localizer["Login.Title"]</h1>
+
+<a class="btn btn-primary" href="/auth/aai">@Localizer["Login.AaiButton"]</a>

@@ -316,7 +316,7 @@
           "attributes" : {}
         }
       ],
-      "http://localhost:8080/saml2/service-provider-metadata/aaieduhr" : [],
+      "https://localhost:8080/Saml2" : [],
       "account" : [
         {
           "id" : "9d9cd4c2-e5a8-4c4b-806c-51e50c88c28f",
@@ -761,7 +761,7 @@
     },
     {
       "id" : "5b670516-9bba-421a-83b7-09b3c28ae338",
-      "clientId" : "http://localhost:8080/saml2/service-provider-metadata/aaieduhr",
+      "clientId" : "https://localhost:8080/Saml2",
       "name" : "",
       "description" : "",
       "rootUrl" : "",
@@ -772,7 +772,7 @@
       "alwaysDisplayInConsole" : false,
       "clientAuthenticatorType" : "client-secret",
       "redirectUris" : [
-        "http://localhost:8080/*"
+        "https://localhost:8080/*"
       ],
       "webOrigins" : [],
       "notBefore" : 0,
@@ -786,9 +786,9 @@
       "frontchannelLogout" : true,
       "protocol" : "saml",
       "attributes" : {
-        "saml.assertion.signature" : "false",
+        "saml.assertion.signature" : "true",
         "saml.force.post.binding" : "true",
-        "saml.server.signature" : "false",
+        "saml.server.signature" : "true",
         "saml.server.signature.keyinfo.ext" : "false",
         "saml.signing.certificate" : "MIIDCzCCAfMCBgGfWE+yaDANBgkqhkiG9w0BAQsFADBJMUcwRQYDVQQDDD5odHRwOi8vbG9jYWxob3N0OjgwODAvc2FtbDIvc2VydmljZS1wcm92aWRlci1tZXRhZGF0YS9hYWllZHVocjAeFw0yNjA3MTIyMTQ5MDVaFw0zNjA3MTIyMTUwNDVaMEkxRzBFBgNVBAMMPmh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC9zYW1sMi9zZXJ2aWNlLXByb3ZpZGVyLW1ldGFkYXRhL2FhaWVkdWhyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoGGFC4rp3fFBITi/JYXojO/V+3BCpM6M+zdNLwweosPrbk1dHqbXL0eIVKarMR9Cz3aq/NMAaceaBzmInpSP/2TXMcL8rdZ4ANWB8iWd+SgAHuZnVplne9Ty76Jeq4XIYyWKRJBofWkJxjA/YVOKZ7XNRSdLPmx2IYhvLW86JzG5Szk1onV1MBP0PLwId2qq/rNrnmAliVx397g0R3ocIY+A6n87rq/WuYODUSD+tbxwkJraTxTDAqkT/FK8WTz0CI6PGXYop6p7H4sS+awAl9hrsvXWZBO7mtlwWKKiULF09TqM7hBLX2KduCwEKwYrnH8GRGlvbvS8cQvbtdnlJwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCCs8mcWfO0J6WzvS0liC3n1I+tD57v+yzDoQj49z/aacws5whOIIwWBb0ZlMmkn4Jnrbc5v8/p352uHtIBFhK7v2Gj/b9pkFBblnNBB8NoTOPskBjN5oInYwuXM3ybWOkgz6R55QhVm+3BmilC53dbmYIAtZp1N1wTw65BUMdWKO9xYoXtuok4k5DDaF7j9C9gSLqpQQl9U8DX9zS8C03G9O93eGRK2DBhYMDJp2VVhVsWbF2cLvGPikboPwaQId4qPVhZuUR7JYRMmB99MKmUh1qWpx+qtxGZESDEyZfczYbMA+h1Vp0024FFMNrtyRXo+CSgQwR5loMgPYU1ix7U",
         "realm_client" : "false",
@@ -796,7 +796,7 @@
         "saml.artifact.binding" : "false",
         "saml.signature.algorithm" : "RSA_SHA256",
         "saml_force_name_id_format" : "false",
-        "saml.client.signature" : "true",
+        "saml.client.signature" : "false",
         "saml.authnstatement" : "true",
         "display.on.consent.screen" : "false",
         "saml_name_id_format" : "username",
