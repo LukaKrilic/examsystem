@@ -5,26 +5,10 @@ using ExamSystem.Web.Models;
 
 namespace ExamSystem.Web.Controllers;
 
+// Only the error action remains — it's the fallback target for UseExceptionHandler and
+// ApiExceptionHandler's non-API path. "/" now redirects straight to /login (Program.cs).
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
-    {
-        _logger = logger;
-    }
-
-    [AllowAnonymous]
-    public IActionResult Index()
-    {
-        return View();
-    }
-
-    public IActionResult Privacy()
-    {
-        return View();
-    }
-
     [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

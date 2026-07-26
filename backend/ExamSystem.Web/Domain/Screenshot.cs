@@ -7,4 +7,6 @@ public class Screenshot
     public DateTimeOffset TakenAt { get; set; }
     public string ImagePath { get; set; } = null!;       // stored on server disk, not in DB
     public DateTimeOffset CreatedAt { get; set; }
+
+    public ExamSession ExamSession { get; set; } = null!;
 }
