@@ -9,4 +9,7 @@ public class StudentOutcomePoints
     public decimal TotalPointsMax { get; set; }
     public decimal ExamPointsEarned { get; set; }
     public decimal ExamPointsMax { get; set; }
+
+    public Student Student { get; set; } = null!;
+    public LearningOutcome LearningOutcome { get; set; } = null!;
 }

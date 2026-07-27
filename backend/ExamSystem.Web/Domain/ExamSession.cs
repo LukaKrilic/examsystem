@@ -14,4 +14,9 @@ public class ExamSession
     public DateTimeOffset? StartedAt { get; set; }       // set at Potvrdi
     public DateTimeOffset? EndedAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+
+    public Student Student { get; set; } = null!;
+    public Exam Exam { get; set; } = null!;
+    public Device? Device { get; set; }
+    public List<SessionOutcome> Outcomes { get; set; } = [];
 }

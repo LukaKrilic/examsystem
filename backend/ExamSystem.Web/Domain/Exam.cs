@@ -8,4 +8,6 @@ public class Exam
     public DateTimeOffset ExamDateTime { get; set; }
     public string Classroom { get; set; } = null!;
     public DateTimeOffset CreatedAt { get; set; }
+
+    public Course Course { get; set; } = null!;
 }

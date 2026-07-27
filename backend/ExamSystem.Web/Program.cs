@@ -1,12 +1,16 @@
 using System.Globalization;
+using System.Security.Claims;
 using ExamSystem.Web.Auth;
 using ExamSystem.Web.Data;
+using ExamSystem.Web.Exceptions;
 using ExamSystem.Web.Filters;
 using ExamSystem.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Sustainsys.Saml2;
 using Sustainsys.Saml2.AspNetCore2;
@@ -16,7 +20,19 @@ using Sustainsys.Saml2.Metadata;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews(o => o.Filters.Add<UnknownStudentExceptionFilter>());
+builder.Services.AddControllersWithViews(o => o.Filters.Add<UnknownStudentExceptionFilter>())
+    .ConfigureApiBehaviorOptions(o =>
+    {
+        // Same {error, message} shape as ApiExceptionHandler, for model-binding/validation failures
+        // that never reach an action (caught by [ApiController]'s automatic 400 behavior).
+        o.InvalidModelStateResponseFactory = ctx =>
+        {
+            var message = string.Join("; ", ctx.ModelState
+                .Where(kv => kv.Value?.Errors.Count > 0)
+                .SelectMany(kv => kv.Value!.Errors.Select(e => $"{kv.Key}: {e.ErrorMessage}")));
+            return new BadRequestObjectResult(new { error = "VALIDATION_ERROR", message });
+        };
+    });
 
 // EF Core maps to the DB owned by database/Database.sql — it never creates or migrates schema.
 builder.Services.AddDbContext<ExamDbContext>(o =>
@@ -24,6 +40,17 @@ builder.Services.AddDbContext<ExamDbContext>(o =>
 
 builder.Services.AddScoped<SamlUserService>();
 builder.Services.AddScoped<InstructionService>();
+builder.Services.AddScoped<ExamQueryService>();
+builder.Services.AddScoped<ExamDetailsService>();
+builder.Services.AddScoped<AccessCodeService>();
+builder.Services.AddScoped<DeviceService>();
+builder.Services.AddScoped<ScreenshotService>();
+builder.Services.AddScoped<InfoedukaExportService>();
+builder.Services.AddScoped<SessionService>();
+builder.Services.AddHostedService<SessionAutoCloser>();
+
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // Three schemes: cookie (the session), Saml2 (signs into the cookie), ApiKey (machine clients).
 builder.Services.AddAuthentication(o =>
@@ -70,6 +97,12 @@ builder.Services.AddAuthorization(o =>
     o.AddPolicy("ApiOrSaml", p => p
         .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, "ApiKey")
         .RequireAuthenticatedUser());
+    o.AddPolicy("ApiKeyOnly", p => p
+        .AddAuthenticationSchemes("ApiKey")
+        .RequireAuthenticatedUser());
+    o.AddPolicy("SamlOnly", p => p
+        .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme)
+        .RequireAuthenticatedUser());
     o.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser().Build();               // everything requires auth by default
 });
@@ -88,9 +121,14 @@ builder.Services.Configure<RequestLocalizationOptions>(o =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+// The ExceptionHandlerOptions overload (not the plain-string one) is required for the registered
+// IExceptionHandler services to run at all. Registered unconditionally (not just in production) so
+// ApiExceptionHandler runs in every environment, including under WebApplicationFactory tests (which
+// default to "Development") — otherwise /api/** errors would never get the {error, message} shape
+// while testing. It returns false for non-API paths, which then fall through to "/Home/Error".
+app.UseExceptionHandler(new ExceptionHandlerOptions { ExceptionHandlingPath = "/Home/Error" });
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -103,6 +141,9 @@ app.UseRouting();
 app.UseRequestLocalization();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// No scaffold landing page — "/" goes straight to the AAI@EduHr login screen.
+app.MapGet("/", () => Results.Redirect("/login")).AllowAnonymous();
 
 app.MapControllerRoute(
     name: "default",
@@ -130,6 +171,18 @@ if (app.Environment.IsDevelopment())
         authenticationType = ctx.User.Identity?.AuthenticationType,
         claims = ctx.User.Claims.Select(c => new { c.Type, c.Value })
     }));
+
+    // Test-only: mints a cookie session carrying the same claims a real SAML assertion would, so
+    // WebApplicationFactory contract tests can exercise SamlOnly-protected endpoints (e.g.
+    // /api/sessions/confirm) without driving an actual SAML round-trip through Keycloak.
+    app.MapPost("/test/sign-in", async (HttpContext ctx, string principal, string? jmbag) =>
+    {
+        var claims = new List<Claim> { new("hrEduPersonUniqueID", principal) };
+        if (jmbag is not null) claims.Add(new Claim("hrEduPersonUniqueNumber", jmbag));
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+        return Results.Ok();
+    }).AllowAnonymous();   // the global fallback policy requires auth on everything by default
 }
 
 app.Run();
