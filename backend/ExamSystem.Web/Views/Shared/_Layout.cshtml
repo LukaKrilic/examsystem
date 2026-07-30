@@ -1,53 +1,28 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ExamSystem.Web</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] — Sustav za provođenje ispita</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ExamSystem.Web.styles.css" asp-append-version="true" />
 </head>
 <body>
     @{
-        var currentLang = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        var currentLang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
         var returnUrl = Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString);
     }
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="/">ExamSystem.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1"></ul>
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link @(currentLang == "hr" ? "fw-bold" : "text-dark")" href="/set-language?lang=hr&returnUrl=@returnUrl">HR</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(currentLang == "en" ? "fw-bold" : "text-dark")" href="/set-language?lang=en&returnUrl=@returnUrl">EN</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - ExamSystem.Web
+    <header class="site-header">
+        <div class="site-header-inner">
+            <a class="brand" href="/">Sustav za provođenje ispita</a>
+            <nav class="lang-switch" aria-label="Language">
+                <a class="lang-link @(currentLang == "hr" ? "active" : "")" href="/set-language?lang=hr&amp;returnUrl=@returnUrl">HR</a>
+                <a class="lang-link @(currentLang == "en" ? "active" : "")" href="/set-language?lang=en&amp;returnUrl=@returnUrl">EN</a>
+            </nav>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    </header>
+    <main class="page">
+        @RenderBody()
+    </main>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

@@ -30,11 +30,22 @@ public class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : IExcepti
             _ => (500, "INTERNAL_ERROR")
         };
 
+        // For everything else, ex.Message is our own domain exception text (safe to return). For an
+        // unmapped 500 it could be a raw SqlException/DbUpdateException message — those leak table,
+        // column, and constraint names, so log the real exception and return a generic one instead.
+        string message;
         if (status == 500)
+        {
             logger.LogError(ex, "Unhandled exception on {Path}", ctx.Request.Path);
+            message = "An unexpected error occurred";
+        }
+        else
+        {
+            message = ex.Message;
+        }
 
         ctx.Response.StatusCode = status;
-        await ctx.Response.WriteAsJsonAsync(new { error = code, message = ex.Message }, ct);
+        await ctx.Response.WriteAsJsonAsync(new { error = code, message }, ct);
         return true;
     }
 }

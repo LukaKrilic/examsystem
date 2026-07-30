@@ -1,0 +1,32 @@
+@model InstructionsInitialPageViewModel
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["InstructionsInitial.Title"];
+}
+
+<h1>@Localizer["InstructionsInitial.Title"]</h1>
+
+<div class="instructions-html">
+    @Html.Raw(Model.InstructionsHtml)
+</div>
+
+@if (Model.ShowAcceptError)
+{
+    <p class="form-error">@Localizer["InstructionsInitial.AcceptRequired"]</p>
+}
+
+<form method="post" action="/exams/@Model.ExamId/instructions">
+    @Html.AntiForgeryToken()
+    <label class="accept-checkbox">
+        <input type="checkbox" id="accept" name="accepted" value="true" />
+        @Localizer["InstructionsInitial.AcceptLabel"]
+    </label>
+    <div class="wizard-actions">
+        <button type="submit" formaction="/exams/@Model.ExamId/instructions/back" formnovalidate class="btn btn-secondary">@Localizer["Common.Back"]</button>
+        <button type="submit" class="btn btn-primary" id="btnNext" disabled>@Localizer["Common.Next"]</button>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/js/instructions-initial.js" asp-append-version="true"></script>
+}

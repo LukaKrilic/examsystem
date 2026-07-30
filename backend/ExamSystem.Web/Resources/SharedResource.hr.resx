@@ -70,4 +70,82 @@
   <data name="UnknownStudent.Message" xml:space="preserve">
     <value>Vaš AAI@EduHr račun nije povezan niti s jednim studentom u sustavu ispita. Obratite se administraciji.</value>
   </data>
+  <data name="Common.Back" xml:space="preserve">
+    <value>Natrag</value>
+  </data>
+  <data name="Common.Next" xml:space="preserve">
+    <value>Dalje</value>
+  </data>
+  <data name="Common.ErrorGeneric" xml:space="preserve">
+    <value>Došlo je do pogreške. Pokušajte ponovno.</value>
+  </data>
+  <data name="Exams.Title" xml:space="preserve">
+    <value>Ispiti</value>
+  </data>
+  <data name="Exams.JmbagLabel" xml:space="preserve">
+    <value>JMBAG</value>
+  </data>
+  <data name="Exams.NoExams" xml:space="preserve">
+    <value>Trenutno nemate niti jedan ispit za polagati.</value>
+  </data>
+  <data name="Exams.SelectButton" xml:space="preserve">
+    <value>Odaberi</value>
+  </data>
+  <data name="Shared.ExamDateTimeLabel" xml:space="preserve">
+    <value>Vrijeme ispita</value>
+  </data>
+  <data name="Shared.ClassroomLabel" xml:space="preserve">
+    <value>Učionica</value>
+  </data>
+  <data name="Shared.SelectedOutcomes" xml:space="preserve">
+    <value>Odabrani ishodi</value>
+  </data>
+  <data name="Outcomes.Title" xml:space="preserve">
+    <value>Odabir ishoda učenja</value>
+  </data>
+  <data name="Outcomes.Intro" xml:space="preserve">
+    <value>Odaberite ishode učenja koje želite polagati na ovom ispitu.</value>
+  </data>
+  <data name="Outcomes.ExamPoints" xml:space="preserve">
+    <value>Bodovi na ispitu:</value>
+  </data>
+  <data name="Outcomes.TotalPoints" xml:space="preserve">
+    <value>Ukupno bodova:</value>
+  </data>
+  <data name="Outcomes.SelectAtLeastOne" xml:space="preserve">
+    <value>Odaberite barem jedan ishod učenja.</value>
+  </data>
+  <data name="InstructionsInitial.Title" xml:space="preserve">
+    <value>Upute za ispit</value>
+  </data>
+  <data name="InstructionsInitial.AcceptLabel" xml:space="preserve">
+    <value>Pročitao/la sam i prihvaćam upute za ispit.</value>
+  </data>
+  <data name="InstructionsInitial.AcceptRequired" xml:space="preserve">
+    <value>Morate prihvatiti upute prije nastavka.</value>
+  </data>
+  <data name="Confirm.Title" xml:space="preserve">
+    <value>Potvrda prijave na ispit</value>
+  </data>
+  <data name="Confirm.Warning" xml:space="preserve">
+    <value>Potvrdom prijave na ovaj ispit svi vaši ostali prijavljeni ispiti u istom terminu bit će trajno zaključani i više neće biti dostupni.</value>
+  </data>
+  <data name="Confirm.ConfirmButton" xml:space="preserve">
+    <value>Potvrdi</value>
+  </data>
+  <data name="InstructionsExam.Title" xml:space="preserve">
+    <value>Upute tijekom ispita</value>
+  </data>
+  <data name="InstructionsExam.EndExamButton" xml:space="preserve">
+    <value>Završi ispit</value>
+  </data>
+  <data name="EndExam.ConfirmText" xml:space="preserve">
+    <value>Jesi li siguran da želiš završiti ispit?</value>
+  </data>
+  <data name="Completed.Title" xml:space="preserve">
+    <value>Ispit završen</value>
+  </data>
+  <data name="Completed.Message" xml:space="preserve">
+    <value>Vaš ispit je uspješno završen. Možete zatvoriti ovu karticu preglednika.</value>
+  </data>
 </root>

@@ -1,0 +1,29 @@
+@model InstructionsExamPageViewModel
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["InstructionsExam.Title"];
+    var isEn = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
+}
+
+<h1>@Localizer["InstructionsExam.Title"]</h1>
+
+<div class="card exam-summary">
+    <h2>@(isEn ? Model.CourseNameEn : Model.CourseNameHr)</h2>
+    <p>@Localizer["Shared.ExamDateTimeLabel"]: @Model.ExamDateTimeLocal.ToString("dd.MM.yyyy. HH:mm")</p>
+    <p>@Localizer["Shared.ClassroomLabel"]: @Model.Classroom</p>
+    <p>@Localizer["Shared.SelectedOutcomes"]: @string.Join(", ", Model.SelectedOutcomes)</p>
+</div>
+
+<div class="instructions-html">
+    @Html.Raw(Model.InstructionsHtml)
+</div>
+
+<div id="examSessionData" data-session-id="@Model.SessionId" hidden></div>
+
+<button type="button" id="btnEndExam" class="btn btn-danger" data-confirm-text="@Localizer["EndExam.ConfirmText"]">
+    @Localizer["InstructionsExam.EndExamButton"]
+</button>
+
+@section Scripts {
+    <script src="~/js/session-instructions.js" asp-append-version="true"></script>
+}

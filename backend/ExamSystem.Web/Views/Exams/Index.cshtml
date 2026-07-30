@@ -1,8 +1,34 @@
-@model ExamSystem.Web.Domain.Student
+@model ActiveExamsResponse
+@inject IStringLocalizer<SharedResource> Localizer
 @{
-    ViewData["Title"] = "Exams";
+    ViewData["Title"] = Localizer["Exams.Title"];
+    var isEn = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
 }
 
-@* Temporary stub view — replaced by the real exam list in Phase 5. *@
-<h1>@Model.FullName</h1>
-<p>JMBAG: @Model.Jmbag</p>
+<h1>@Localizer["Exams.Title"]</h1>
+<p class="student-info">
+    <strong>@Model.Student.FullName</strong>
+    <span class="muted">@Localizer["Exams.JmbagLabel"]: @Model.Student.Jmbag</span>
+</p>
+
+@if (Model.Exams.Count == 0)
+{
+    <p class="empty-state">@Localizer["Exams.NoExams"]</p>
+}
+else
+{
+    <div class="exam-list">
+        @foreach (var exam in Model.Exams)
+        {
+            <div class="card exam-card">
+                <h2>@(isEn ? exam.CourseNameEN : exam.CourseNameHR)</h2>
+                <p>@Localizer["Shared.ExamDateTimeLabel"]: @exam.ExamDateTime.ToString("dd.MM.yyyy. HH:mm")</p>
+                <p>@Localizer["Shared.ClassroomLabel"]: @exam.Classroom</p>
+                <form method="post" action="/exams/@exam.ExamId/select">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-primary">@Localizer["Exams.SelectButton"]</button>
+                </form>
+            </div>
+        }
+    </div>
+}
