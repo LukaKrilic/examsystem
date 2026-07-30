@@ -7,6 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExamSystem.Web.Services;
 
+// CreateDraftAsync and SaveStepAsync back the wizard steps (exam selection, OUTCOMES/INSTRUCTIONS
+// progression) called from the Phase 5 Razor MVC controllers (Controllers/Web) — there is no REST
+// endpoint for them, since only the browser wizard drives step progress. LockoutAndStateMachineTests
+// exercises them directly the same way those controllers do.
 public class SessionService(ExamDbContext db)
 {
     // Legal Natrag/Dalje moves per the CLAUDE.md wizard state-machine table. CONFIRM -> IN_EXAM is
@@ -36,6 +40,12 @@ public class SessionService(ExamDbContext db)
 
         var chosen = await db.Exams.FirstOrDefaultAsync(e => e.ExamId == examId)
             ?? throw new ExamNotFoundException(examId);
+
+        // Only exams the student is actually registered for can become a session — otherwise the
+        // wizard's "select" action would let a student start a session for an arbitrary exam ID.
+        var registered = await db.ExamRegistrations.AnyAsync(r => r.StudentId == studentId && r.ExamId == chosen.Id);
+        if (!registered)
+            throw new ExamNotFoundException(examId);
 
         var locked = await db.LockedExams.AnyAsync(l => l.StudentId == studentId && l.ExamId == chosen.Id);
         if (locked)
@@ -152,6 +162,14 @@ public class SessionService(ExamDbContext db)
         return await LoadedSessions()
             .FirstOrDefaultAsync(s => s.StudentId == studentId && s.Status == SessionStatus.ACTIVE)
             ?? throw new NoActiveSessionException(studentId.ToString());
+    }
+
+    // Non-throwing variant for the Razor wizard controllers, which need to branch on "no active
+    // session" (render the exam list / redirect to it) rather than treat it as an error.
+    public async Task<ExamSession?> TryFindActiveByStudentAsync(long studentId)
+    {
+        return await LoadedSessions()
+            .FirstOrDefaultAsync(s => s.StudentId == studentId && s.Status == SessionStatus.ACTIVE);
     }
 
     public async Task<ExamSession> FindActiveByStudentIdAsync(string studentId)

@@ -172,9 +172,14 @@ if (app.Environment.IsDevelopment())
         claims = ctx.User.Claims.Select(c => new { c.Type, c.Value })
     }));
 
+#if DEBUG
     // Test-only: mints a cookie session carrying the same claims a real SAML assertion would, so
     // WebApplicationFactory contract tests can exercise SamlOnly-protected endpoints (e.g.
     // /api/sessions/confirm) without driving an actual SAML round-trip through Keycloak.
+    // #if DEBUG, not just IsDevelopment() — this mints a session for ANY principal with no secret,
+    // so it must not exist in the binary at all once published Release (a misconfigured
+    // ASPNETCORE_ENVIRONMENT would otherwise be the only thing standing between this and a full
+    // auth bypass).
     app.MapPost("/test/sign-in", async (HttpContext ctx, string principal, string? jmbag) =>
     {
         var claims = new List<Claim> { new("hrEduPersonUniqueID", principal) };
@@ -183,6 +188,7 @@ if (app.Environment.IsDevelopment())
         await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
         return Results.Ok();
     }).AllowAnonymous();   // the global fallback policy requires auth on everything by default
+#endif
 }
 
 app.Run();

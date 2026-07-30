@@ -1,0 +1,31 @@
+@model ConfirmPageViewModel
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["Confirm.Title"];
+    var isEn = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
+}
+
+<h1>@Localizer["Confirm.Title"]</h1>
+
+<div class="card exam-summary">
+    <h2>@(isEn ? Model.CourseNameEn : Model.CourseNameHr)</h2>
+    <p>@Localizer["Shared.ExamDateTimeLabel"]: @Model.ExamDateTimeLocal.ToString("dd.MM.yyyy. HH:mm")</p>
+    <p>@Localizer["Shared.ClassroomLabel"]: @Model.Classroom</p>
+    <p>@Localizer["Shared.SelectedOutcomes"]: @string.Join(", ", Model.SelectedOutcomes)</p>
+</div>
+
+<p class="warning-box">@Localizer["Confirm.Warning"]</p>
+
+<p id="confirmError" class="form-error" hidden>@Localizer["Common.ErrorGeneric"]</p>
+
+<div class="wizard-actions">
+    <form method="post" action="/exams/@Model.ExamId/confirm/back">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-secondary">@Localizer["Common.Back"]</button>
+    </form>
+    <button type="button" id="btnConfirm" class="btn btn-primary">@Localizer["Confirm.ConfirmButton"]</button>
+</div>
+
+@section Scripts {
+    <script src="~/js/confirm.js" asp-append-version="true"></script>
+}

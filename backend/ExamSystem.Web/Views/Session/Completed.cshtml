@@ -1,0 +1,7 @@
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["Completed.Title"];
+}
+
+<h1>@Localizer["Completed.Title"]</h1>
+<p>@Localizer["Completed.Message"]</p>

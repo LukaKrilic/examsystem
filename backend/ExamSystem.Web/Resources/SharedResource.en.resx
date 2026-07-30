@@ -70,4 +70,82 @@
   <data name="UnknownStudent.Message" xml:space="preserve">
     <value>Your AAI@EduHr account is not linked to any student in the exam system. Please contact administration.</value>
   </data>
+  <data name="Common.Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Common.Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Common.ErrorGeneric" xml:space="preserve">
+    <value>Something went wrong. Please try again.</value>
+  </data>
+  <data name="Exams.Title" xml:space="preserve">
+    <value>Exams</value>
+  </data>
+  <data name="Exams.JmbagLabel" xml:space="preserve">
+    <value>Student ID</value>
+  </data>
+  <data name="Exams.NoExams" xml:space="preserve">
+    <value>You currently have no exam to take.</value>
+  </data>
+  <data name="Exams.SelectButton" xml:space="preserve">
+    <value>Select</value>
+  </data>
+  <data name="Shared.ExamDateTimeLabel" xml:space="preserve">
+    <value>Exam date and time</value>
+  </data>
+  <data name="Shared.ClassroomLabel" xml:space="preserve">
+    <value>Classroom</value>
+  </data>
+  <data name="Shared.SelectedOutcomes" xml:space="preserve">
+    <value>Selected outcomes</value>
+  </data>
+  <data name="Outcomes.Title" xml:space="preserve">
+    <value>Select learning outcomes</value>
+  </data>
+  <data name="Outcomes.Intro" xml:space="preserve">
+    <value>Select the learning outcomes you want to take on this exam.</value>
+  </data>
+  <data name="Outcomes.ExamPoints" xml:space="preserve">
+    <value>Exam points:</value>
+  </data>
+  <data name="Outcomes.TotalPoints" xml:space="preserve">
+    <value>Total points:</value>
+  </data>
+  <data name="Outcomes.SelectAtLeastOne" xml:space="preserve">
+    <value>Select at least one learning outcome.</value>
+  </data>
+  <data name="InstructionsInitial.Title" xml:space="preserve">
+    <value>Exam instructions</value>
+  </data>
+  <data name="InstructionsInitial.AcceptLabel" xml:space="preserve">
+    <value>I have read and accept the exam instructions.</value>
+  </data>
+  <data name="InstructionsInitial.AcceptRequired" xml:space="preserve">
+    <value>You must accept the instructions to continue.</value>
+  </data>
+  <data name="Confirm.Title" xml:space="preserve">
+    <value>Confirm exam registration</value>
+  </data>
+  <data name="Confirm.Warning" xml:space="preserve">
+    <value>Confirming registration for this exam will permanently lock all your other registered exams in the same time slot — they will no longer be available.</value>
+  </data>
+  <data name="Confirm.ConfirmButton" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="InstructionsExam.Title" xml:space="preserve">
+    <value>During-exam instructions</value>
+  </data>
+  <data name="InstructionsExam.EndExamButton" xml:space="preserve">
+    <value>End exam</value>
+  </data>
+  <data name="EndExam.ConfirmText" xml:space="preserve">
+    <value>Are you sure you want to end the exam?</value>
+  </data>
+  <data name="Completed.Title" xml:space="preserve">
+    <value>Exam finished</value>
+  </data>
+  <data name="Completed.Message" xml:space="preserve">
+    <value>Your exam has been successfully finished. You can close this browser tab.</value>
+  </data>
 </root>

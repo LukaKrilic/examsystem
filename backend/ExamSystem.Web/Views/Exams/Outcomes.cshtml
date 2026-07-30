@@ -1,0 +1,38 @@
+@model OutcomesPageViewModel
+@inject IStringLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = Localizer["Outcomes.Title"];
+    var isEn = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
+}
+
+<h1>@Localizer["Outcomes.Title"]</h1>
+<h2 class="subtitle">@(isEn ? Model.CourseNameEn : Model.CourseNameHr)</h2>
+<p>@Localizer["Outcomes.Intro"]</p>
+
+@if (Model.ShowSelectionError)
+{
+    <p class="form-error">@Localizer["Outcomes.SelectAtLeastOne"]</p>
+}
+
+<form method="post" action="/exams/@Model.ExamId/outcomes">
+    @Html.AntiForgeryToken()
+    <div class="outcome-grid">
+        @foreach (var card in Model.Outcomes)
+        {
+            var o = card.Outcome;
+            var green = o.TotalPointsEarned >= o.TotalPointsMax * 0.5m;
+            <label class="outcome-card @(green ? "green" : "")">
+                <div class="outcome-card-header">
+                    <input type="checkbox" name="outcomes" value="@o.OutcomeCode" @(card.Selected ? "checked" : "") />
+                    <h3>@o.OutcomeCode</h3>
+                </div>
+                <p><span>@Localizer["Outcomes.ExamPoints"]</span> <span>@o.ExamPointsEarned.ToString("0.00", CultureInfo.InvariantCulture)/@o.ExamPointsMax.ToString("0.00", CultureInfo.InvariantCulture)</span></p>
+                <p><span>@Localizer["Outcomes.TotalPoints"]</span> <span>@o.TotalPointsEarned.ToString("0.00", CultureInfo.InvariantCulture)/@o.TotalPointsMax.ToString("0.00", CultureInfo.InvariantCulture)</span></p>
+            </label>
+        }
+    </div>
+    <div class="wizard-actions">
+        <a class="btn btn-secondary" href="/exams">@Localizer["Common.Back"]</a>
+        <button type="submit" class="btn btn-primary">@Localizer["Common.Next"]</button>
+    </div>
+</form>

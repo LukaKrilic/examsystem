@@ -1,6 +1,10 @@
+using System.Text.Json.Serialization;
+
 namespace ExamSystem.Web.Dtos;
 
-public record ActiveExamsRequest(string StudentId, DateTime Timestamp);
+public record ActiveExamsRequest(
+    string StudentId,
+    [property: JsonConverter(typeof(NaiveLocalDateTimeConverter))] DateTime Timestamp);
 
 public record ActiveExamsResponse(StudentDto Student, QueryDto Query, List<ExamDto> Exams);
 
