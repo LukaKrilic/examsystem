@@ -105,6 +105,15 @@ CREATE TABLE ExamSession (
     GroupNo    INT NULL,                             -- 1 or 2, NULL for online
     Status     NVARCHAR(20) NOT NULL DEFAULT 'ACTIVE',  -- ACTIVE | FINISHED | AUTO_CLOSED
     WizardStep NVARCHAR(30) NOT NULL DEFAULT 'EXAMS',   -- EXAMS|OUTCOMES|INSTRUCTIONS|CONFIRM|IN_EXAM
+    -- Snapshot taken at Potvrdi: the spec says confirmed data is locked ("ih više neće moći
+    -- mijenjati"), and the during-exam screens must keep working even if Infoeduka is briefly
+    -- unreachable mid-exam. NULL until the session is confirmed.
+    CourseNameHr    NVARCHAR(200) NULL,
+    CourseNameEn    NVARCHAR(200) NULL,
+    ExamDateTime    DATETIMEOFFSET NULL,
+    Classroom       NVARCHAR(30) NULL,
+    StudentFullName NVARCHAR(200) NULL,
+    StudentJmbag    NVARCHAR(10) NULL,
     StartedAt  DATETIMEOFFSET NULL,                  -- set at Potvrdi
     EndedAt    DATETIMEOFFSET NULL,
     CreatedAt  DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET()

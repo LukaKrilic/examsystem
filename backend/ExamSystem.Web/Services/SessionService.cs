@@ -129,6 +129,15 @@ public class SessionService(ExamDbContext db)
                 CreatedAt = DateTimeOffset.UtcNow
             });
 
+        // Freeze Infoeduka's view of this exam onto the session row. From here on the during-exam
+        // screens and the screenshot payloads read these columns, not Infoeduka.
+        session.CourseNameHr = chosen.Course.CourseNameHr;
+        session.CourseNameEn = chosen.Course.CourseNameEn;
+        session.ExamDateTime = chosen.ExamDateTime;
+        session.Classroom = chosen.Classroom;
+        session.StudentFullName = session.Student.FullName;
+        session.StudentJmbag = session.Student.Jmbag;
+
         session.StartedAt = DateTimeOffset.UtcNow;
         session.WizardStep = WizardStep.IN_EXAM;
 
