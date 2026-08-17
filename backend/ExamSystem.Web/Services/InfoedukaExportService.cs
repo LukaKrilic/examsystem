@@ -1,40 +1,37 @@
 using ExamSystem.Web.Data;
 using ExamSystem.Web.Dtos;
-using ExamSystem.Web.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExamSystem.Web.Services;
 
+// The ONE direction where we are the source of truth: this endpoint serves data TO Infoeduka, so it
+// stays purely local and never calls IInfoedukaClient.
+//
+// The roster is therefore every student who has a session for this exam, with their names read from
+// the confirm-time snapshot. Students who merely registered but never started a session are not
+// listed — we hold no registration table, and Infoeduka already knows who registered.
 public class InfoedukaExportService(ExamDbContext db)
 {
     public async Task<ExamStudentsResponse> GetStudentsAsync(string examId)
     {
-        var exam = await db.Exams.FirstOrDefaultAsync(e => e.ExamId == examId)
-            ?? throw new ExamNotFoundException(examId);
-
-        var registrations = await db.ExamRegistrations
-            .Include(r => r.Student)
-            .Where(r => r.ExamId == exam.Id)
+        var sessions = await db.ExamSessions
+            .Include(s => s.Outcomes)
+            .Where(s => s.ExamId == examId)
+            .OrderByDescending(s => s.CreatedAt)
             .ToListAsync();
 
-        var students = new List<ExamStudentDto>();
-        foreach (var reg in registrations)
-        {
-            var session = await db.ExamSessions
-                .Include(s => s.Outcomes).ThenInclude(o => o.LearningOutcome)
-                .Where(s => s.StudentId == reg.StudentId && s.ExamId == exam.Id)
-                .OrderByDescending(s => s.CreatedAt)
-                .FirstOrDefaultAsync();
-
-            students.Add(new ExamStudentDto(
-                reg.Student.StudentId,
-                reg.Student.FullName,
-                reg.Student.Jmbag,
-                session?.GroupNo,
-                session?.SessionId,
-                session?.StartedAt?.UtcDateTime,
-                session?.Outcomes.Select(o => o.LearningOutcome.OutcomeCode).ToList() ?? []));
-        }
+        var students = sessions
+            .GroupBy(s => s.StudentId)
+            .Select(g => g.First())        // most recent session per student
+            .Select(s => new ExamStudentDto(
+                s.StudentId,
+                s.StudentFullName ?? "",
+                s.StudentJmbag ?? "",
+                s.GroupNo,
+                s.SessionId,
+                s.StartedAt?.UtcDateTime,
+                s.Outcomes.Select(o => o.OutcomeCode).OrderBy(c => c).ToList()))
+            .ToList();
 
         return new ExamStudentsResponse(examId, students);
     }

@@ -20,4 +20,12 @@ public record InfoedukaOutcome(
     decimal ExamPointsEarned,
     decimal ExamPointsMax);
 
-public record InfoedukaCourseOutcomes(string CourseId, string CourseName, IReadOnlyList<InfoedukaOutcome> Outcomes);
+// CourseName is CLAUDE.md's documented field (the HR name); CourseNameHr/CourseNameEn are additive,
+// because /api/student/exam-details has to publish BOTH names and this is the only call that knows
+// the course — the student may hold outcome points for a course they have no current registration for.
+public record InfoedukaCourseOutcomes(
+    string CourseId,
+    string CourseName,
+    string CourseNameHr,
+    string CourseNameEn,
+    IReadOnlyList<InfoedukaOutcome> Outcomes);

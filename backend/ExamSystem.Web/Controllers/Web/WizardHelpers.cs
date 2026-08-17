@@ -12,9 +12,9 @@ internal static class WizardHelpers
 
     public static string RouteFor(ExamSession session) => session.WizardStep switch
     {
-        WizardStep.OUTCOMES => $"/exams/{session.Exam.ExamId}/outcomes",
-        WizardStep.INSTRUCTIONS => $"/exams/{session.Exam.ExamId}/instructions",
-        WizardStep.CONFIRM => $"/exams/{session.Exam.ExamId}/confirm",
+        WizardStep.OUTCOMES => $"/exams/{session.ExamId}/outcomes",
+        WizardStep.INSTRUCTIONS => $"/exams/{session.ExamId}/instructions",
+        WizardStep.CONFIRM => $"/exams/{session.ExamId}/confirm",
         WizardStep.IN_EXAM => "/session/instructions",
         _ => "/exams"
     };

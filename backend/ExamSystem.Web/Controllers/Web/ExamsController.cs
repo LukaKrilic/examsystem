@@ -3,6 +3,7 @@ using ExamSystem.Web.Auth;
 using ExamSystem.Web.Domain;
 using ExamSystem.Web.Enums;
 using ExamSystem.Web.Exceptions;
+using ExamSystem.Web.Infoeduka;
 using ExamSystem.Web.Models;
 using ExamSystem.Web.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +13,16 @@ namespace ExamSystem.Web.Controllers.Web;
 // The wizard's EXAMS/OUTCOMES/INSTRUCTIONS/CONFIRM steps. Every GET here re-checks the persisted
 // ExamSession.WizardStep and redirects to WizardHelpers.RouteFor(session) when the URL doesn't
 // match it — deep-linking forward past the persisted step is impossible by construction.
+//
+// All four steps run BEFORE confirmation, so the exam's course name / date / classroom are read live
+// from Infoeduka on every render (the session's snapshot columns are still NULL until Potvrdi).
 public class ExamsController(
     SamlUserService samlUserService,
     SessionService sessions,
     ExamQueryService examQuery,
     ExamDetailsService examDetails,
-    InstructionService instructions) : Controller
+    InstructionService instructions,
+    IInfoedukaClient infoeduka) : Controller
 {
     private const string InitialInstructionId = "EXAM-GENERAL-V1";
 
@@ -25,7 +30,7 @@ public class ExamsController(
     public async Task<IActionResult> Index()
     {
         var student = await samlUserService.ResolveStudentAsync(User);
-        var session = await sessions.TryFindActiveByStudentAsync(student.Id);
+        var session = await sessions.TryFindActiveByStudentAsync(student.StudentId);
         if (session is not null)
             return Redirect(WizardHelpers.RouteFor(session));
 
@@ -38,13 +43,13 @@ public class ExamsController(
     public async Task<IActionResult> Select(string examId)
     {
         var student = await samlUserService.ResolveStudentAsync(User);
-        var existing = await sessions.TryFindActiveByStudentAsync(student.Id);
+        var existing = await sessions.TryFindActiveByStudentAsync(student.StudentId);
         if (existing is not null)
             return Redirect(WizardHelpers.RouteFor(existing));
 
         try
         {
-            await sessions.CreateDraftAsync(student.Id, examId);
+            await sessions.CreateDraftAsync(student.StudentId, examId);
         }
         catch (ExamNotFoundException)
         {
@@ -62,10 +67,10 @@ public class ExamsController(
     public async Task<IActionResult> Outcomes(string examId)
     {
         var student = await samlUserService.ResolveStudentAsync(User);
-        var session = await sessions.TryFindActiveByStudentAsync(student.Id);
+        var session = await sessions.TryFindActiveByStudentAsync(student.StudentId);
         if (session is null)
             return Redirect("/exams");
-        if (session.Exam.ExamId != examId || session.WizardStep != WizardStep.OUTCOMES)
+        if (session.ExamId != examId || session.WizardStep != WizardStep.OUTCOMES)
             return Redirect(WizardHelpers.RouteFor(session));
 
         return View(await BuildOutcomesViewModel(student, session, showError: false));
@@ -76,10 +81,10 @@ public class ExamsController(
     public async Task<IActionResult> OutcomesNext(string examId, [FromForm] List<string>? outcomes)
     {
         var student = await samlUserService.ResolveStudentAsync(User);
-        var session = await sessions.TryFindActiveByStudentAsync(student.Id);
+        var session = await sessions.TryFindActiveByStudentAsync(student.StudentId);
         if (session is null)
             return Redirect("/exams");
-        if (session.Exam.ExamId != examId || session.WizardStep != WizardStep.OUTCOMES)
+        if (session.ExamId != examId || session.WizardStep != WizardStep.OUTCOMES)
             return Redirect(WizardHelpers.RouteFor(session));
 
         if (outcomes is null || outcomes.Count == 0)
@@ -92,11 +97,11 @@ public class ExamsController(
     [HttpGet("/exams/{examId}/instructions")]
     public async Task<IActionResult> InstructionsInitial(string examId)
     {
-        var session = await sessions.TryFindActiveByStudentAsync(
-            (await samlUserService.ResolveStudentAsync(User)).Id);
+        var student = await samlUserService.ResolveStudentAsync(User);
+        var session = await sessions.TryFindActiveByStudentAsync(student.StudentId);
         if (session is null)
             return Redirect("/exams");
-        if (session.Exam.ExamId != examId || session.WizardStep != WizardStep.INSTRUCTIONS)
+        if (session.ExamId != examId || session.WizardStep != WizardStep.INSTRUCTIONS)
             return Redirect(WizardHelpers.RouteFor(session));
 
         return View(await BuildInstructionsViewModel(examId, showError: false));
@@ -107,10 +112,10 @@ public class ExamsController(
     public async Task<IActionResult> InstructionsInitialNext(string examId, [FromForm] bool accepted)
     {
         var student = await samlUserService.ResolveStudentAsync(User);
-        var session = await sessions.TryFindActiveByStudentAsync(student.Id);
+        var session = await sessions.TryFindActiveByStudentAsync(student.StudentId);
         if (session is null)
             return Redirect("/exams");
-        if (session.Exam.ExamId != examId || session.WizardStep != WizardStep.INSTRUCTIONS)
+        if (session.ExamId != examId || session.WizardStep != WizardStep.INSTRUCTIONS)
             return Redirect(WizardHelpers.RouteFor(session));
 
         if (!accepted)
@@ -125,10 +130,10 @@ public class ExamsController(
     public async Task<IActionResult> InstructionsInitialBack(string examId)
     {
         var student = await samlUserService.ResolveStudentAsync(User);
-        var session = await sessions.TryFindActiveByStudentAsync(student.Id);
+        var session = await sessions.TryFindActiveByStudentAsync(student.StudentId);
         if (session is null)
             return Redirect("/exams");
-        if (session.Exam.ExamId != examId || session.WizardStep != WizardStep.INSTRUCTIONS)
+        if (session.ExamId != examId || session.WizardStep != WizardStep.INSTRUCTIONS)
             return Redirect(WizardHelpers.RouteFor(session));
 
         await sessions.SaveStepAsync(session.SessionId, WizardStep.OUTCOMES, null);
@@ -139,13 +144,13 @@ public class ExamsController(
     public async Task<IActionResult> Confirm(string examId)
     {
         var student = await samlUserService.ResolveStudentAsync(User);
-        var session = await sessions.TryFindActiveByStudentAsync(student.Id);
+        var session = await sessions.TryFindActiveByStudentAsync(student.StudentId);
         if (session is null)
             return Redirect("/exams");
-        if (session.Exam.ExamId != examId || session.WizardStep != WizardStep.CONFIRM)
+        if (session.ExamId != examId || session.WizardStep != WizardStep.CONFIRM)
             return Redirect(WizardHelpers.RouteFor(session));
 
-        return View(BuildConfirmViewModel(session));
+        return View(await BuildConfirmViewModel(student, session));
     }
 
     [HttpPost("/exams/{examId}/confirm/back")]
@@ -153,25 +158,27 @@ public class ExamsController(
     public async Task<IActionResult> ConfirmBack(string examId)
     {
         var student = await samlUserService.ResolveStudentAsync(User);
-        var session = await sessions.TryFindActiveByStudentAsync(student.Id);
+        var session = await sessions.TryFindActiveByStudentAsync(student.StudentId);
         if (session is null)
             return Redirect("/exams");
-        if (session.Exam.ExamId != examId || session.WizardStep != WizardStep.CONFIRM)
+        if (session.ExamId != examId || session.WizardStep != WizardStep.CONFIRM)
             return Redirect(WizardHelpers.RouteFor(session));
 
         await sessions.SaveStepAsync(session.SessionId, WizardStep.INSTRUCTIONS, null);
         return Redirect($"/exams/{examId}/instructions");
     }
 
-    private async Task<OutcomesPageViewModel> BuildOutcomesViewModel(Student student, ExamSession session, bool showError)
+    private async Task<OutcomesPageViewModel> BuildOutcomesViewModel(
+        InfoedukaStudent student, ExamSession session, bool showError)
     {
-        var details = await examDetails.GetDetailsAsync(student.StudentId, session.Exam.Course.CourseId);
-        var selectedCodes = session.Outcomes.Select(o => o.LearningOutcome.OutcomeCode).ToHashSet();
+        var registration = await RegistrationForAsync(student.StudentId, session.ExamId);
+        var details = await examDetails.GetDetailsAsync(student.StudentId, registration.CourseId);
+        var selectedCodes = session.Outcomes.Select(o => o.OutcomeCode).ToHashSet();
         var cards = details.Outcomes
             .Select(o => new OutcomeCardViewModel(o, selectedCodes.Contains(o.OutcomeCode)))
             .ToList();
-        return new OutcomesPageViewModel(session.Exam.ExamId, session.Exam.Course.CourseNameHr,
-            session.Exam.Course.CourseNameEn, cards, showError);
+        return new OutcomesPageViewModel(session.ExamId, registration.CourseNameHr,
+            registration.CourseNameEn, cards, showError);
     }
 
     private async Task<InstructionsInitialPageViewModel> BuildInstructionsViewModel(string examId, bool showError)
@@ -182,11 +189,18 @@ public class ExamsController(
         return new InstructionsInitialPageViewModel(examId, body, showError);
     }
 
-    private static ConfirmPageViewModel BuildConfirmViewModel(ExamSession session)
+    private async Task<ConfirmPageViewModel> BuildConfirmViewModel(InfoedukaStudent student, ExamSession session)
     {
-        var localDt = WizardHelpers.ToZagrebLocal(session.Exam.ExamDateTime);
-        var outcomes = session.Outcomes.Select(o => o.LearningOutcome.OutcomeCode).OrderBy(c => c).ToList();
-        return new ConfirmPageViewModel(session.Exam.ExamId, session.Exam.Course.CourseNameHr,
-            session.Exam.Course.CourseNameEn, localDt, session.Exam.Classroom, outcomes);
+        var registration = await RegistrationForAsync(student.StudentId, session.ExamId);
+        var localDt = WizardHelpers.ToZagrebLocal(registration.ExamDateTime);
+        var outcomes = session.Outcomes.Select(o => o.OutcomeCode).OrderBy(c => c).ToList();
+        return new ConfirmPageViewModel(session.ExamId, registration.CourseNameHr,
+            registration.CourseNameEn, localDt, registration.Classroom, outcomes);
     }
+
+    // The exam behind an unconfirmed session: it lives in Infoeduka, and the student's registration
+    // list is the only place that names it.
+    private async Task<InfoedukaRegistration> RegistrationForAsync(string studentId, string examId)
+        => (await infoeduka.GetRegistrationsAsync(studentId)).FirstOrDefault(r => r.ExamId == examId)
+           ?? throw new ExamNotFoundException(examId);
 }

@@ -155,20 +155,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Phase 2 temporary check: proves the backend reads seed data through the DbContext.
-// Remove once the real API lands (Phase 4). Development-only so it never ships.
 if (app.Environment.IsDevelopment())
 {
-    app.MapGet("/dev/db-check", async (ExamDbContext db) => Results.Ok(new
-    {
-        students = await db.Students.CountAsync(),
-        courses = await db.Courses.CountAsync(),
-        exams = await db.Exams.CountAsync(),
-        outcomes = await db.LearningOutcomes.CountAsync(),
-        points = await db.StudentOutcomePoints.CountAsync(),
-        instructions = await db.Instructions.CountAsync()
-    }));
-
     // Debug endpoint: prints every claim on the current principal, so the SAML attribute mapping
     // (hrEduPersonUniqueID, hrEduPersonUniqueNumber, ...) can be inspected after a Keycloak login.
     app.MapGet("/whoami", (HttpContext ctx) => Results.Ok(new

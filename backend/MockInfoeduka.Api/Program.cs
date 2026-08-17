@@ -75,7 +75,16 @@ app.MapGet("/api/students/{studentId}/courses/{courseId}/outcomes", (string stud
             examPointsMax = o.ExamMax
         });
 
-    return Results.Ok(new { courseId, courseName = course.NameHr, outcomes });
+    // courseName is the contract's documented field; both localized names are published alongside it
+    // because the exam system's own /api/student/exam-details has to return courseNameHR and courseNameEN.
+    return Results.Ok(new
+    {
+        courseId,
+        courseName = course.NameHr,
+        courseNameHr = course.NameHr,
+        courseNameEn = course.NameEn,
+        outcomes
+    });
 });
 
 app.Run();

@@ -18,7 +18,7 @@ public class SessionsController(SessionService sessions, SamlUserService samlUse
     public async Task<IActionResult> Confirm([FromBody] SessionConfirmRequest request)
     {
         var student = await samlUserService.ResolveStudentAsync(User);
-        var session = await sessions.ConfirmAsync(student.Id, request.DeviceId, request.GroupNo);
+        var session = await sessions.ConfirmAsync(student.StudentId, request.DeviceId, request.GroupNo);
         return Ok(SessionService.ToStateResponse(session));
     }
 
@@ -27,7 +27,7 @@ public class SessionsController(SessionService sessions, SamlUserService samlUse
     {
         var session = !string.IsNullOrEmpty(request.SessionId)
             ? await sessions.FindBySessionIdAsync(request.SessionId)
-            : await sessions.FindActiveByStudentIdAsync(
+            : await sessions.FindActiveByStudentAsync(
                 request.StudentId ?? throw new NoActiveSessionException("unknown"));
         return Ok(SessionService.ToStateResponse(session));
     }
