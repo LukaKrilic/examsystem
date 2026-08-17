@@ -77,6 +77,15 @@ builder.Services.AddAuthentication(o =>
             ctx.Response.Redirect(ctx.RedirectUri);
             return Task.CompletedTask;
         };
+        // Resolve the AAI identity to an Infoeduka student ONCE, as the cookie is issued, and carry
+        // it in the cookie. Without this every page load would need Infoeduka up — including the
+        // during-exam page of a confirmed session, whose data is already frozen on the row.
+        o.Events.OnSigningIn = async ctx =>
+        {
+            if (ctx.Principal is null) return;
+            var users = ctx.HttpContext.RequestServices.GetRequiredService<SamlUserService>();
+            await users.AttachStudentClaimsAsync(ctx.Principal);
+        };
     })
     .AddSaml2(o =>
     {
