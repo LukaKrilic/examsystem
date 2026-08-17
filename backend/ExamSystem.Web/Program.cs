@@ -4,6 +4,7 @@ using ExamSystem.Web.Auth;
 using ExamSystem.Web.Data;
 using ExamSystem.Web.Exceptions;
 using ExamSystem.Web.Filters;
+using ExamSystem.Web.Infoeduka;
 using ExamSystem.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -37,6 +38,11 @@ builder.Services.AddControllersWithViews(o => o.Filters.Add<UnknownStudentExcept
 // EF Core maps to the DB owned by database/Database.sql — it never creates or migrates schema.
 builder.Services.AddDbContext<ExamDbContext>(o =>
     o.UseSqlServer(builder.Configuration.GetConnectionString("ExamDb")));
+
+// The only door to Infoeduka data. Typed + pooled; swapping in the real system later touches this
+// line and one class, nothing else.
+builder.Services.AddHttpClient<IInfoedukaClient, HttpInfoedukaClient>(c =>
+    c.BaseAddress = new Uri(builder.Configuration["Infoeduka:BaseUrl"]!));
 
 builder.Services.AddScoped<SamlUserService>();
 builder.Services.AddScoped<InstructionService>();
