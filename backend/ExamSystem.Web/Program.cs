@@ -4,6 +4,7 @@ using ExamSystem.Web.Auth;
 using ExamSystem.Web.Data;
 using ExamSystem.Web.Exceptions;
 using ExamSystem.Web.Filters;
+using ExamSystem.Web.Infoeduka;
 using ExamSystem.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -38,6 +39,11 @@ builder.Services.AddControllersWithViews(o => o.Filters.Add<UnknownStudentExcept
 builder.Services.AddDbContext<ExamDbContext>(o =>
     o.UseSqlServer(builder.Configuration.GetConnectionString("ExamDb")));
 
+// The only door to Infoeduka data. Typed + pooled; swapping in the real system later touches this
+// line and one class, nothing else.
+builder.Services.AddHttpClient<IInfoedukaClient, HttpInfoedukaClient>(c =>
+    c.BaseAddress = new Uri(builder.Configuration["Infoeduka:BaseUrl"]!));
+
 builder.Services.AddScoped<SamlUserService>();
 builder.Services.AddScoped<InstructionService>();
 builder.Services.AddScoped<ExamQueryService>();
@@ -70,6 +76,15 @@ builder.Services.AddAuthentication(o =>
             }
             ctx.Response.Redirect(ctx.RedirectUri);
             return Task.CompletedTask;
+        };
+        // Resolve the AAI identity to an Infoeduka student ONCE, as the cookie is issued, and carry
+        // it in the cookie. Without this every page load would need Infoeduka up — including the
+        // during-exam page of a confirmed session, whose data is already frozen on the row.
+        o.Events.OnSigningIn = async ctx =>
+        {
+            if (ctx.Principal is null) return;
+            var users = ctx.HttpContext.RequestServices.GetRequiredService<SamlUserService>();
+            await users.AttachStudentClaimsAsync(ctx.Principal);
         };
     })
     .AddSaml2(o =>
@@ -149,20 +164,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Phase 2 temporary check: proves the backend reads seed data through the DbContext.
-// Remove once the real API lands (Phase 4). Development-only so it never ships.
 if (app.Environment.IsDevelopment())
 {
-    app.MapGet("/dev/db-check", async (ExamDbContext db) => Results.Ok(new
-    {
-        students = await db.Students.CountAsync(),
-        courses = await db.Courses.CountAsync(),
-        exams = await db.Exams.CountAsync(),
-        outcomes = await db.LearningOutcomes.CountAsync(),
-        points = await db.StudentOutcomePoints.CountAsync(),
-        instructions = await db.Instructions.CountAsync()
-    }));
-
     // Debug endpoint: prints every claim on the current principal, so the SAML attribute mapping
     // (hrEduPersonUniqueID, hrEduPersonUniqueNumber, ...) can be inspected after a Keycloak login.
     app.MapGet("/whoami", (HttpContext ctx) => Results.Ok(new

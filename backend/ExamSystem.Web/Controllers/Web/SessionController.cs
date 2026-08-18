@@ -10,6 +10,9 @@ namespace ExamSystem.Web.Controllers.Web;
 // The IN_EXAM / terminal part of the wizard: the during-exam instructions page (resumed straight
 // here after login while a session is IN_EXAM — see ExamsController.Index) and the online
 // completion page shown after "Zavrsi ispit" (Electron just quits instead, see session-instructions.js).
+//
+// This page deliberately makes NO Infoeduka call: the session is past Potvrdi, so its exam data is
+// frozen on the row and the exam keeps working even if Infoeduka goes down mid-exam.
 public class SessionController(
     SamlUserService samlUserService,
     SessionService sessions,
@@ -21,7 +24,7 @@ public class SessionController(
     public async Task<IActionResult> InstructionsExam()
     {
         var student = await samlUserService.ResolveStudentAsync(User);
-        var session = await sessions.TryFindActiveByStudentAsync(student.Id);
+        var session = await sessions.TryFindActiveByStudentAsync(student.StudentId);
         if (session is null)
             return Redirect("/exams");
         if (session.WizardStep != WizardStep.IN_EXAM)
@@ -30,12 +33,12 @@ public class SessionController(
         var html = await instructions.GetHtmlAsync(ExamInstructionId);
         var isEn = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
         var body = html is null ? string.Empty : (isEn ? html.Instructions.En : html.Instructions.Hr);
-        var localDt = WizardHelpers.ToZagrebLocal(session.Exam.ExamDateTime);
-        var outcomes = session.Outcomes.Select(o => o.LearningOutcome.OutcomeCode).OrderBy(c => c).ToList();
+        var localDt = WizardHelpers.ToZagrebLocal(session.ExamDateTime ?? default);
+        var outcomes = session.Outcomes.Select(o => o.OutcomeCode).OrderBy(c => c).ToList();
 
-        return View(new InstructionsExamPageViewModel(session.SessionId, session.Exam.ExamId,
-            session.Exam.Course.CourseNameHr, session.Exam.Course.CourseNameEn,
-            localDt, session.Exam.Classroom, outcomes, body));
+        return View(new InstructionsExamPageViewModel(session.SessionId, session.ExamId,
+            session.CourseNameHr ?? "", session.CourseNameEn ?? "",
+            localDt, session.Classroom ?? "", outcomes, body));
     }
 
     [HttpGet("/session/completed")]
