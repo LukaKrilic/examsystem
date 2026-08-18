@@ -19,6 +19,10 @@ GO
 -- drop in FK dependency order (children first)
 DROP TABLE IF EXISTS Screenshot, SessionOutcome, ExamSession, LockedExam,
                      ExamAccessCode, Instruction, Device;
+-- Legacy tables from before the Infoeduka boundary migration. This script no longer creates them —
+-- that data lives in MockInfoeduka.Api now — but a dev database created earlier still has them, and
+-- without this they would survive every re-run as orphans holding exactly the data we moved out.
+DROP TABLE IF EXISTS StudentOutcomePoints, ExamRegistration, LearningOutcome, Exam, Course, Student;
 GO
 
 CREATE TABLE Device (
