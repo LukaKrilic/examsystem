@@ -14,8 +14,8 @@ appsettings.*.local.json
 wwwroot/lib/
 
 # Electron
-electronApp/node_modules/
-electronApp/dist/
+electron-app/node_modules/
+electron-app/dist/
 
 # IDE
 .vs/
