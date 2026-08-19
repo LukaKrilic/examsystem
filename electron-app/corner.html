@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<title>Ispit</title>
+<style>
+  /* Sized for the 360x260 corner window. The frame costs 65px, so the usable viewport is only
+     327x195 - measured, not estimated. Everything below is budgeted against that 195px. */
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font: 13px/1.35 "Segoe UI", system-ui, sans-serif;
+    color: #1b2431;
+    background: #f4f6f9;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  #widget { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  header { display: flex; align-items: center; justify-content: flex-end; }
+  .lang { display: flex; gap: 4px; }
+  .lang button {
+    font: inherit; font-size: 11px; font-weight: 600;
+    padding: 2px 7px; border: 1px solid #c8d0da; border-radius: 4px;
+    background: #fff; color: #46536a; cursor: pointer;
+  }
+  .lang button[aria-pressed="true"] { background: #1f5eb5; border-color: #1f5eb5; color: #fff; }
+
+  .key-label { font-size: 11px; color: #6b7686; }
+  .key-row { display: flex; gap: 6px; align-items: stretch; }
+  #examKey {
+    flex: 1; min-width: 0;
+    font-family: Consolas, "Cascadia Mono", monospace; font-size: 15px; font-weight: 700;
+    letter-spacing: .04em;
+    background: #fff; border: 1px solid #c8d0da; border-radius: 4px;
+    padding: 4px 8px;
+    display: flex; align-items: center;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    -webkit-user-select: text; user-select: text;
+  }
+  #btnCopy {
+    font: inherit; font-size: 11px; font-weight: 600;
+    padding: 0 10px; border: 1px solid #c8d0da; border-radius: 4px;
+    background: #fff; color: #46536a; cursor: pointer; white-space: nowrap;
+  }
+  #btnCopy:hover { background: #eef2f7; }
+
+  nav { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  nav button {
+    font: inherit; font-size: 12px;
+    height: 26px; padding: 0 6px;
+    border: 1px solid #c8d0da; border-radius: 4px;
+    background: #fff; color: #1b2431; cursor: pointer;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  nav button:hover { background: #eef2f7; }
+  #btnResults { grid-column: 1 / -1; }
+  #btnEnd {
+    grid-column: 1 / -1; height: 28px;
+    background: #b3261e; border-color: #b3261e; color: #fff; font-weight: 600;
+  }
+  #btnEnd:hover { background: #971d16; }
+
+  button:focus-visible, #examKey:focus-visible { outline: 2px solid #1f5eb5; outline-offset: 1px; }
+
+  /* session-ended state: replaces the whole widget */
+  #ended { display: none; flex: 1; flex-direction: column; justify-content: center; text-align: center; }
+  body.ended #widget { display: none; }
+  body.ended #ended { display: flex; }
+  #endedTitle { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
+  #endedMessage { font-size: 12px; color: #46536a; margin: 0; }
+</style>
+</head>
+<body>
+
+<div id="widget">
+  <header>
+    <div class="lang">
+      <button type="button" id="langHr" aria-pressed="true">HR</button>
+      <button type="button" id="langEn" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <div class="key-label" id="keyLabel">Ključ za ispit</div>
+  <div class="key-row">
+    <div id="examKey" tabindex="0">—</div>
+    <button type="button" id="btnCopy">Copy</button>
+  </div>
+
+  <nav>
+    <button type="button" id="btnInstructions">Upute</button>
+    <button type="button" id="btnExamNet">Exam.net</button>
+    <button type="button" id="btnResults">Rezultati praktičnog ispita</button>
+    <button type="button" id="btnEnd">Završi ispit</button>
+  </nav>
+</div>
+
+<div id="ended">
+  <h1 id="endedTitle">Ispit završen</h1>
+  <p id="endedMessage">Vaš ispit je završen. Aplikacija će se zatvoriti.</p>
+</div>
+
+<script src="corner.js"></script>
+</body>
+</html>
